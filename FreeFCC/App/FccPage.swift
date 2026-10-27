@@ -19,7 +19,7 @@ struct FccPage: View {
             ConnectionPill(status: controller.status, isConnected: controller.isConnected)
 
             GlowCard {
-                ModeBadge(isFccEnabled: controller.isFccEnabled)
+                ModeBadge(isFccEnabled: controller.isFccEnabled, isConfirmed: controller.isFccConfirmed)
                     .padding(.bottom, 12)
                 if controller.isConnected {
                     HStack(spacing: 8) {
@@ -113,11 +113,11 @@ struct FccPage: View {
                 """
                 Sequence that works, in order:
 
-                1. Drone and controller on.
+                1. Drone and controller on, iPhone cabled to the controller's TOP USB port.
                 2. Open DJI Fly and wait until it shows the drone connected with a camera feed. \
                 This is what wakes the controller's link to the aircraft.
-                3. Close DJI Fly (swipe it away).
-                4. Cable into the TOP USB port and tap Connect here, then Enable FCC.
+                3. Close DJI Fly (swipe it away). Leave the cable where it is.
+                4. Come back here, tap Connect, then Enable FCC.
 
                 The link stays warm for a while after DJI Fly closes, and that is the window this \
                 app needs. Skipping step 2 is why an apply gets 0 responses even though the drone \
@@ -147,14 +147,22 @@ struct FccPage: View {
             }
         } else if controller.isFccEnabled {
             BodyText(
-                """
-                FCC applied. Re-applying every few seconds to hold it, which keeps working while \
-                this app is in the background.
+                controller.isFccConfirmed
+                    ? """
+                    FCC applied. Re-applying every few seconds to hold it, which keeps working while \
+                    this app is in the background.
 
-                If DJI Fly cannot see the controller, tap Release to hand the link back without \
-                unplugging the cable.
-                """,
-                color: Palette.green
+                    If DJI Fly cannot see the controller, tap Release to hand the link back without \
+                    unplugging the cable.
+                    """
+                    : """
+                    The sequence went out and is being re-sent, but the aircraft has not answered, so \
+                    there is no proof it took. Open DJI Fly and look at Transmission: if the graph has \
+                    not changed, the radio is still on CE.
+
+                    If it reads CE, share the Log tab (after Dump All Traffic) in issue #5 on GitHub.
+                    """,
+                color: controller.isFccConfirmed ? Palette.green : Palette.amber
             )
             .padding(.bottom, 20)
             VStack(spacing: 12) {
@@ -347,6 +355,25 @@ private struct ConnectionPill: View {
 
 private struct ModeBadge: View {
     let isFccEnabled: Bool
+    /// False while holding a sequence the aircraft never answered: shown in
+    /// amber, because a green tick there is what sent people to fly in CE
+    /// believing they were in FCC.
+    let isConfirmed: Bool
+
+    private var tint: Color {
+        guard isFccEnabled else { return Palette.textWhite }
+        return isConfirmed ? Palette.green : Palette.amber
+    }
+
+    private var caption: String {
+        guard isFccEnabled else { return "Default region" }
+        return isConfirmed ? "High-power region active" : "Sent, not confirmed. Check DJI Fly Transmission"
+    }
+
+    private var symbol: String {
+        guard isFccEnabled else { return "dot.radiowaves.left.and.right" }
+        return isConfirmed ? "checkmark.circle.fill" : "questionmark.circle.fill"
+    }
 
     var body: some View {
         HStack(alignment: .center) {
@@ -357,16 +384,16 @@ private struct ModeBadge: View {
                     .foregroundStyle(Palette.textDim)
                 Text(isFccEnabled ? "FCC" : "CE")
                     .font(.system(size: 30, weight: .black))
-                    .foregroundStyle(isFccEnabled ? Palette.green : Palette.textWhite)
+                    .foregroundStyle(tint)
                     .contentTransition(.numericText())
-                Text(isFccEnabled ? "High-power region active" : "Default region")
+                Text(caption)
                     .font(.system(size: 12))
-                    .foregroundStyle(isFccEnabled ? Palette.green.opacity(0.7) : Palette.textGray)
+                    .foregroundStyle(isFccEnabled ? tint.opacity(0.7) : Palette.textGray)
             }
             Spacer()
-            Image(systemName: isFccEnabled ? "checkmark.circle.fill" : "dot.radiowaves.left.and.right")
+            Image(systemName: symbol)
                 .font(.system(size: isFccEnabled ? 40 : 32))
-                .foregroundStyle(isFccEnabled ? Palette.green : Palette.textDim)
+                .foregroundStyle(isFccEnabled ? tint : Palette.textDim)
                 .symbolEffect(.bounce, value: isFccEnabled)
         }
         .padding(.horizontal, 20)

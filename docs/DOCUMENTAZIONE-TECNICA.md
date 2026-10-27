@@ -12,7 +12,7 @@ dopo deve poter capire la logica, riprodurre i risultati, e sapere dove mettere
 le mani per estendere l'app senza ripartire da zero.
 
 Autore, Andrea Piani, www.andreapiani.com.
-Questa revisione corrisponde alla versione 1.8.1 (build 11) dell'app, settembre 2026.
+Questa revisione corrisponde alla versione 1.8.2 (build 13) dell'app, ottobre 2026.
 
 ---
 
@@ -215,9 +215,17 @@ L'envelope RCLink, definito in `FreeFCC/Core/RCLink.swift`:
 ```
 
 I due byte di rotta (`49 57`) sono un default. Il parser in ingresso li aggiorna
-con quelli visti sull'ultimo envelope ricevuto dal telecomando, e da lì in poi
-l'app li rispedisce indietro, così la rotta segue quella che il telecomando
-stesso dichiara.
+con quelli visti sull'ultimo envelope del telecomando che conteneva un frame di
+comando, e da lì in poi l'app li rispedisce indietro, così la rotta segue quella
+che il telecomando stesso dichiara.
+
+Contano solo gli envelope il cui contenuto comincia con un frame DUML valido. Lo
+stesso link porta il video in envelope suoi: sul Lito 1 e sul Mini 4 Pro
+arrivano come `55 CC 4A 57 F0 0F 00 00`, circa 4 KB l'uno, e sono molti di più
+di quelli di comando. Fino alla v1.8.1 ogni envelope spostava la rotta, quindi
+su quei droni la maggior parte dei passaggi FCC partiva indirizzata alla rotta
+del video. Dalla v1.8.2 il registro stampa le rotte viste (`Envelope routes:`)
+e quella usata per i comandi (`Commands sent on route`).
 
 L'app può inviare in una delle due cornici, e di default fa uno **sweep**: prova
 prima RCLink, poi DUML puro. Quale delle due il telecomando accetta lo decide il

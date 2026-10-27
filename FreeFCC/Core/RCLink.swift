@@ -79,8 +79,18 @@ enum RCLink {
 /// stream lines up again.
 struct DumplStreamParser {
 
-    /// Route bytes seen on the last RCLink envelope, if any.
+    /// Route bytes of the last envelope that carried a command frame, if any.
+    ///
+    /// Only envelopes whose payload opens on a valid DUMPL frame count. The
+    /// same link carries the video feed in envelopes of its own (`4A 57`,
+    /// about 4 KB each, on the Lito 1 and the Mini 4 Pro), and those vastly
+    /// outnumber the command ones. Learning the route from every envelope
+    /// meant the app spent most of each session addressing its FCC frames
+    /// to the video route.
     private(set) var lastRoute: [UInt8]?
+    /// Envelopes seen per route, keyed by the two route bytes as a UInt16
+    /// (`0x4957` for `49 57`), so the log can say which routes the link uses.
+    private(set) var envelopesByRoute = [UInt16: Int]()
 
     /// How the inbound frames were actually wrapped, and how much of the
     /// stream the resync had to throw away to find them.
@@ -131,11 +141,16 @@ struct DumplStreamParser {
                     continue
                 }
                 guard remaining >= RCLink.headerLength + len else { break scan }
-                lastRoute = [buffer[index + 2], buffer[index + 3]]
+                let route = [buffer[index + 2], buffer[index + 3]]
                 envelopesSeen += 1
+                envelopesByRoute[(UInt16(route[0]) << 8) | UInt16(route[1]), default: 0] += 1
                 let inner = Array(buffer[(index + RCLink.headerLength)..<(index + RCLink.headerLength + len)])
                 // The envelope carries one or more DUMPL frames; parse them out.
-                frames.append(contentsOf: Self.splitDumplFrames(inner))
+                let found = Self.splitDumplFrames(inner)
+                if let first = found.first, inner.starts(with: first) {
+                    lastRoute = route
+                }
+                frames.append(contentsOf: found)
                 index += RCLink.headerLength + len
                 continue
             }

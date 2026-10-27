@@ -69,6 +69,19 @@ struct DumplStreamParserTests {
         #expect(parser.lastRoute == [0x41, 0x42])
     }
 
+    /// Lito 1 and Mini 4 Pro logs open on `55 CC 4A 57 F0 0F`: the video feed,
+    /// in envelopes of its own. Those must not move the command route.
+    @Test func aVideoEnvelopeDoesNotMoveTheCommandRoute() {
+        var parser = DumplStreamParser()
+        let inner = frame(cmdSet: 16, cmdId: 88, seq: 12, payload: [3, 1, 0])
+        _ = parser.feed(RCLink.wrap(inner, route: [0x49, 0x57]))
+        let video = (0..<4080).map { UInt8(truncatingIfNeeded: $0 &* 37 &+ 11) }
+        _ = parser.feed(RCLink.wrap(video, route: [0x4A, 0x57]))
+        #expect(parser.lastRoute == [0x49, 0x57])
+        #expect(parser.envelopesByRoute[0x4A57] == 1)
+        #expect(parser.envelopesByRoute[0x4957] == 1)
+    }
+
     @Test func rejectsAFrameWithABrokenBodyCrc() {
         var parser = DumplStreamParser()
         var bytes = frame(cmdSet: 6, cmdId: 114, seq: 5, payload: [1, 2, 3, 4])

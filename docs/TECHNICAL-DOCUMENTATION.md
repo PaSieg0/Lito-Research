@@ -12,7 +12,7 @@ next should be able to understand the logic, reproduce the results, and know
 where to put their hands to extend the app without starting from scratch.
 
 Author, Andrea Piani, www.andreapiani.com.
-This revision matches app version 1.8.1 (build 11), September 2026.
+This revision matches app version 1.8.2 (build 13), October 2026.
 
 ---
 
@@ -213,9 +213,17 @@ The RCLink envelope, defined in `FreeFCC/Core/RCLink.swift`:
 ```
 
 The two route bytes (`49 57`) are a default. The inbound parser updates them
-with the ones seen on the last envelope received from the remote, and from then
-on the app sends them back, so the route follows the one the remote itself
-declares.
+with the ones seen on the last envelope from the remote that carried a command
+frame, and from then on the app sends them back, so the route follows the one
+the remote itself declares.
+
+Only envelopes whose payload opens on a valid DUML frame count. The same link
+carries the video feed in envelopes of its own: on the Lito 1 and the Mini 4
+Pro they arrive as `55 CC 4A 57 F0 0F 00 00`, about 4 KB each, and they far
+outnumber the command ones. Up to v1.8.1 every envelope moved the route, so on
+those aircraft most FCC passes went out addressed to the video route. Since
+v1.8.2 the log prints the routes seen (`Envelope routes:`) and the one commands
+use (`Commands sent on route`).
 
 The app can send in either framing, and by default it does a **sweep**: it tries
 RCLink first, then bare DUML. Which of the two the remote accepts is decided by

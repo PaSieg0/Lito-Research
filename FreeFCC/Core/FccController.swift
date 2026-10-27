@@ -91,6 +91,9 @@ final class FccController {
     private(set) var transportKind = ""
     private(set) var isConnected = false
     private(set) var isFccEnabled = false
+    /// The aircraft answered the apply. Without it the app is holding a
+    /// sequence nobody acknowledged, and the badge must not read as success.
+    private(set) var isFccConfirmed = false
     private(set) var isBusy = false
     private(set) var busyProgress: Double = 0
     private(set) var logMessages: [String] = []
@@ -258,7 +261,7 @@ final class FccController {
         message = "Connecting to the controller..."
         if announce {
             log("Connecting to the controller...")
-            log("First open DJI Fly so the drone links, then close it and plug into the TOP USB port.")
+            log("First open DJI Fly so the drone links, then close it. The cable stays in the TOP USB port.")
         }
 
         frameCensus.value = [:]
@@ -480,6 +483,10 @@ final class FccController {
         // How the far end frames what it sends is the best available guide to
         // how it expects to be spoken to.
         postLog("Inbound framing: \(rx.envelopes) RCLink envelopes, \(rx.bareFrames) bare frames, \(rx.skippedBytes) bytes skipped resyncing")
+        if !rx.envelopesByRoute.isEmpty {
+            postLog("Envelope routes: \(rx.routesSummary)")
+        }
+        postLog("Commands sent on route \(transport.currentRoute.map { String(format: "%02X", $0) }.joined(separator: " "))")
         postLog("First bytes on the link:")
         postLog(rx.previewHex)
 
@@ -1744,6 +1751,7 @@ final class FccController {
             if acks > 0 {
                 self.status = .fccEnabled
                 self.isFccEnabled = true
+                self.isFccConfirmed = true
                 self.message = "FCC applied and the controller answered. Check Transmission in DJI Fly."
                 self.log("FCC applied, starting repeat to hold it")
                 self.startRepeat()
@@ -1755,9 +1763,10 @@ final class FccController {
                 // and keep re-applying rather than asking for a manual tap.
                 self.status = .fccEnabled
                 self.isFccEnabled = true
+                self.isFccConfirmed = false
                 self.busyProgress = 1
-                self.message = "FCC sequence applied and held. Verify in DJI Fly Transmission: the signal should reach past 1km."
-                self.log("Applied with the aircraft linked, holding by re-applying (region cannot be read back here)")
+                self.message = "Sent and held, but nothing answered. Only DJI Fly's Transmission tab can tell whether it took."
+                self.log("Applied with the aircraft linked, no response: holding by re-applying, NOT confirmed")
                 self.startRepeat()
             } else if anyWrite {
                 self.status = .sentUnconfirmed
@@ -1777,6 +1786,7 @@ final class FccController {
     func holdFcc() {
         guard requireConnection() else { return }
         isFccEnabled = true
+        isFccConfirmed = false
         status = .fccEnabled
         message = "Holding FCC by re-applying on an interval."
         log("Hold requested, starting repeat despite no responses")
@@ -1790,6 +1800,7 @@ final class FccController {
             self.status = .connected
             if succeeded {
                 self.isFccEnabled = false
+                self.isFccConfirmed = false
                 self.message = "CE mode restored"
                 self.log("CE mode restored")
             } else {

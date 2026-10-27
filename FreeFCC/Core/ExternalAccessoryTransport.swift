@@ -391,6 +391,7 @@ final class ExternalAccessoryTransport: NSObject, DumplTransport, StreamDelegate
             current.envelopes = parser.envelopesSeen
             current.bareFrames = parser.bareFramesSeen
             current.skippedBytes = parser.skippedBytes
+            current.envelopesByRoute = parser.envelopesByRoute
             if current.preview.count < 256 {
                 current.preview.append(contentsOf: bytes.prefix(256 - current.preview.count))
             }

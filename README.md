@@ -10,7 +10,7 @@
 [![Platform](https://img.shields.io/badge/Platform-iOS%2017%2B-black?style=flat-square&logo=apple)](#)
 [![Confirmed](https://img.shields.io/badge/RC--N3%20%2B%20DJI%20Neo-confirmed%20on%20hardware-34D399?style=flat-square)](#-confirmed-on-hardware)
 [![Website](https://img.shields.io/badge/Website-andreapiani.com-0A84FF?style=flat-square)](https://www.andreapiani.com/dji-fcc-unlock-ios.html)
-[![Version](https://img.shields.io/badge/Version-1.8.1%20(build%2011)-8B5CF6?style=flat-square)](project.yml)
+[![Version](https://img.shields.io/badge/Version-1.8.2%20(build%2013)-8B5CF6?style=flat-square)](project.yml)
 [![Build](https://github.com/andreapianidev/DJI-FCC-Unlock-iOS/actions/workflows/build.yml/badge.svg)](https://github.com/andreapianidev/DJI-FCC-Unlock-iOS/actions/workflows/build.yml)
 
 **The first FCC unlock built natively for iPhone.** No server, no account, no
@@ -156,17 +156,22 @@ The order matters. The controller only relays commands to the aircraft once
 DJI Fly has woken that link, and the link stays warm for a while after DJI Fly
 closes. That warm window is what the app needs.
 
-1. Power on the **drone** and the controller, wait for them to pair.
+1. Power on the **drone** and the controller, wait for them to pair. Cable the
+   iPhone to the **TOP** USB port of the controller, the phone-cradle port.
+   The cable stays in for every step below.
 2. **Open DJI Fly first** and wait until it shows the drone connected with a
    live camera feed. This is the step that wakes the controller-to-aircraft
    link. Skipping it is why an apply gets 0 responses even with the drone
    detected.
-3. **Close DJI Fly** (swipe it away).
-4. Cable the iPhone to the **TOP** USB port of the controller, the phone-cradle
-   port.
-5. Open FCC Unlock, tap **Connect**, wait for the green line with the aircraft
+3. **Close DJI Fly** (swipe it away). Do not unplug anything.
+4. Open FCC Unlock, tap **Connect**, wait for the green line with the aircraft
    serial, then tap **Enable FCC Mode** and let the sweep finish. A line like
    `profile@02/RCLink: 38 responses` means the aircraft answered.
+5. Read the badge. **Green FCC** means the aircraft answered. **Amber FCC**
+   means the frames went out and are being re-sent, but nothing answered, so
+   there is no proof the radio switched: check Transmission in DJI Fly and, if
+   it still reads CE, post the log in
+   [#5](https://github.com/andreapianidev/DJI-FCC-Unlock-iOS/issues/5).
 6. Do **not** reopen DJI Fly straight away. Reopening it right after the unlock
    drops the radio back to CE every time (see the sequence below).
 

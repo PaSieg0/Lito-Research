@@ -57,12 +57,22 @@ struct RxStats: Sendable {
     var envelopes = 0
     var bareFrames = 0
     var skippedBytes = 0
+    /// Inbound envelopes per route.
+    var envelopesByRoute = [UInt16: Int]()
     /// First bytes seen on the link, kept for a hex dump. The wire format is
     /// readable straight off this.
     var preview: [UInt8] = []
 
     var previewHex: String {
         preview.map { String(format: "%02X", $0) }.joined(separator: " ")
+    }
+
+    /// "49 57 x120, 4A 57 x8000", busiest route first.
+    var routesSummary: String {
+        envelopesByRoute
+            .sorted { $0.value > $1.value }
+            .map { String(format: "%02X %02X x%d", $0.key >> 8, $0.key & 0xFF, $0.value) }
+            .joined(separator: ", ")
     }
 }
 
