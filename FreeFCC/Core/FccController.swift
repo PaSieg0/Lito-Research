@@ -103,6 +103,11 @@ final class FccController {
     private(set) var profile: Profile?
     private(set) var protocolInUse = ""
 
+    private(set) var litoAltitudeReading: LitoAltitudeReading?
+    private(set) var litoAltitudeMessage = "No altitude parameter has been read in this connection."
+    private var litoSessionID = UUID()
+    private let litoInbox = LitoReplyInbox()
+
     var autoFcc = false {
         didSet {
             guard autoFcc != oldValue else { return }
@@ -175,14 +180,14 @@ final class FccController {
 
     // MARK: Lifecycle
 
-    func start() {
-        autoFcc = defaults.bool(forKey: Keys.autoFcc)
+    func start(allowAutoFcc: Bool = true) {
+        autoFcc = allowAutoFcc && defaults.bool(forKey: Keys.autoFcc)
         if let raw = defaults.string(forKey: Keys.framingMode), let mode = FramingMode(rawValue: raw) {
             framingMode = mode
         }
         preferredProtocol = defaults.string(forKey: Keys.preferredProtocol) ?? ""
         DiagnosticLog.shared.startSession(header: [
-            "FCC Unlock iOS \(AppInfo.version) build \(AppInfo.build)",
+            "Lito Research UNOFFICIAL \(AppInfo.version) build \(AppInfo.build)",
             "Device \(UIDevice.current.model) iOS \(UIDevice.current.systemVersion)",
             "Started \(ISO8601DateFormatter().string(from: Date()))",
             "Declared protocols: \(ExternalAccessoryTransport.declaredProtocols.joined(separator: ", "))"
@@ -230,6 +235,7 @@ final class FccController {
 
     /// Called when iOS reports the accessory went away under us.
     func accessoryDisconnected() {
+        invalidateLitoReading()
         refreshAccessories()
         guard isConnected else { return }
         stopRepeat()
@@ -282,6 +288,7 @@ final class FccController {
                         self?.handleResponseOffMain(response)
                     }
                     transport.start()
+                    invalidateLitoReading()
                     transportBox.value = transport
                     transportName = transport.name
                     transportKind = transport.kind
@@ -554,6 +561,7 @@ final class FccController {
 
     /// Runs on the transport's IO thread, so it only touches the boxes.
     private nonisolated func handleResponseOffMain(_ response: DumplResponse) {
+        litoInbox.receive(response)
         let key = (response.sender << 24) | (response.dst << 16) | (response.cmdSet << 8) | response.cmdId
         frameCensus.withLock {
             var entry = $0[key] ?? (0, [])
@@ -673,6 +681,7 @@ final class FccController {
     /// without unplugging the cable; the radio keeps whatever region was last
     /// applied.
     func releaseSession() {
+        invalidateLitoReading()
         stopRepeat()
         serialPollTask?.cancel()
         serialPollTask = nil
@@ -703,7 +712,7 @@ final class FccController {
 
     /// Whole log as one block, for the share sheet on the Log tab.
     var logExport: String {
-        var lines = ["FCC Unlock iOS log"]
+        var lines = ["Lito Research iOS log (unofficial)"]
         if !transportName.isEmpty { lines.append("Transport: \(transportName)") }
         if !protocolInUse.isEmpty { lines.append("Protocol: \(protocolInUse)") }
         if !detectedSerial.isEmpty { lines.append("Aircraft: \(detectedSerial)") }
@@ -1808,5 +1817,106 @@ final class FccController {
                 self.log("CE restore failed")
             }
         }
+    }
+}
+
+// MARK: Personal Lito X1 research extension
+// Kept in this file to share the controller's private transport without adding
+// a second frame listener or exposing an arbitrary-command API to the UI.
+extension FccController {
+    func readLitoAltitude(parameter: LitoAltitudeParameter,
+                          identity: LitoCommandIdentity, framing: Framing) {
+        guard !isBusy, !autoFcc, !isFccEnabled,
+              isConnected, aircraftLinked,
+              let transport = transportBox.value, transport.isOpen else {
+            litoAltitudeMessage = "Connect to the aircraft with all automatic applies stopped first."
+            return
+        }
+        let session = litoSessionID
+        litoAltitudeReading = nil
+        isBusy = true
+        litoAltitudeMessage = "Reading one parameter. No parameter write is included."
+        log("Lito research read: \(parameter.rawValue), \(identity.rawValue), \(framing.label)")
+        engineQueue.async { [weak self] in
+            guard let self else { return }
+            let reply = self.litoExchange(transport: transport, parameter: parameter,
+                                          identity: identity, framing: framing)
+            self.finishLitoRead(reply, parameter: parameter, identity: identity,
+                                framing: framing, session: session, transport: transport)
+        }
+    }
+
+    private nonisolated func litoExchange(transport: any DumplTransport,
+                                          parameter: LitoAltitudeParameter,
+                                          identity: LitoCommandIdentity,
+                                          framing: Framing) -> LitoAltitudeReply? {
+        guard transport.isOpen, !transport.detectedSerial.isEmpty else { return nil }
+        let request = LitoAltitudeRequest(parameter: parameter, identity: identity,
+                                           sequence: SequenceCounter.shared.next())
+        let route = transport.currentRoute
+        let before = transport.rxStats.bytesWritten
+        litoInbox.begin(request)
+        func send(_ frame: DumplFrame, sequence: Int? = nil) -> Bool {
+            guard transport.isOpen else { return false }
+            let bytes = DumplBuilder.buildFrame(frame, seq: sequence ?? SequenceCounter.shared.next())
+            return transport.write(RCLink.encode(bytes, framing: framing, route: route))
+        }
+
+        guard send(request.frame, sequence: request.sequence) else {
+            litoInbox.cancel()
+            return nil
+        }
+
+        let reply = litoInbox.wait(seconds: 0.8)
+        let written = max(0, transport.rxStats.bytesWritten - before)
+        postLog(String(format: "Lito command %02X seq=%d route=%@, transport wrote %d bytes during observation (includes keepalives)",
+                       request.command, request.sequence,
+                       route.map { String(format: "%02X", $0) }.joined(separator: " "), written))
+        return reply
+    }
+
+    private nonisolated func finishLitoRead(_ reply: LitoAltitudeReply?,
+                                            parameter: LitoAltitudeParameter,
+                                            identity: LitoCommandIdentity, framing: Framing,
+                                            session: UUID, transport: any DumplTransport) {
+        let receivedAt = Date()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.isBusy = false
+            guard self.litoSessionID == session, self.isConnected, transport.isOpen,
+                  let current = self.transportBox.value,
+                  ObjectIdentifier(current) == ObjectIdentifier(transport) else {
+                self.litoAltitudeReading = nil
+                self.litoAltitudeMessage = "Connection changed. Parameter state is unknown; obtain a fresh read."
+                return
+            }
+            let prefix = "Parameter read"
+            if case let .value(metres) = reply {
+                self.litoAltitudeReading = LitoAltitudeReading(
+                    id: UUID(), session: session, parameter: parameter,
+                    identity: identity, framing: framing, value: metres, receivedAt: receivedAt)
+                self.litoAltitudeMessage = "\(prefix): \(metres) m. DJI Fly acceptance and the flight ceiling remain unverified."
+            } else {
+                self.litoAltitudeReading = nil
+                self.litoAltitudeMessage = "\(prefix): \(Self.litoDescription(reply)). No stored value was verified."
+            }
+            self.log(self.litoAltitudeMessage)
+        }
+    }
+
+    private nonisolated static func litoDescription(_ reply: LitoAltitudeReply?) -> String {
+        switch reply {
+        case .value(let value): return "reply reports \(value) m"
+        case .rejected(let status): return "nonzero response status \(status)"
+        case .incomplete: return "incomplete response; no value confirmed"
+        case .wrongParameter: return "response hash does not match the requested parameter"
+        case nil: return "no matching reply; state unknown"
+        }
+    }
+
+    private func invalidateLitoReading() {
+        litoSessionID = UUID()
+        litoAltitudeReading = nil
+        litoInbox.cancel()
     }
 }

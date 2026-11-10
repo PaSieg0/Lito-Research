@@ -17,7 +17,7 @@ struct FreeFCCApp: App {
                 .environment(controller)
                 .preferredColorScheme(.dark)
                 .tint(Palette.cyan)
-                .task { controller.start() }
+                .task { controller.start(allowAutoFcc: false) }
                 .onReceive(NotificationCenter.default.publisher(for: .EAAccessoryDidConnect)) { _ in
                     controller.refreshAccessories()
                 }
@@ -29,29 +29,12 @@ struct FreeFCCApp: App {
 }
 
 struct RootView: View {
-    /// Launching with `-initialTab N` opens tab N (0 FCC, 1 Log, 2 Profile,
-    /// 3 Experimental, 4 About); the default is FCC. This is how the README
-    /// screenshots are taken from a headless simulator:
-    /// `xcrun simctl launch <udid> com.andreapiani.freefcc -initialTab 4`.
-    @State private var selection = UserDefaults.standard.integer(forKey: "initialTab")
-
     var body: some View {
-        TabView(selection: $selection) {
-            FccPage()
-                .tabItem { Label("FCC", systemImage: "antenna.radiowaves.left.and.right") }
-                .tag(0)
+        TabView {
+            LitoResearchPage()
+                .tabItem { Label("Research", systemImage: "magnifyingglass") }
             LogPage()
                 .tabItem { Label("Log", systemImage: "list.bullet.rectangle") }
-                .tag(1)
-            ProfilePage()
-                .tabItem { Label("Profile", systemImage: "doc.text.magnifyingglass") }
-                .tag(2)
-            ExperimentalPage()
-                .tabItem { Label("Experimental", systemImage: "flask") }
-                .tag(3)
-            AboutPage()
-                .tabItem { Label("About", systemImage: "info.circle") }
-                .tag(4)
         }
     }
 }

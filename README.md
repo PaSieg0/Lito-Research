@@ -1,3 +1,10 @@
+> **Unofficial personal Lito Research variant, 1.8.3 (14).**
+> This is a read-only diagnostic variant, not an upstream release or altitude unlock. It installs as
+> **Lito Research** with a separate bundle ID. Only Research and Log are exposed;
+> FCC/GEO/Sport tools are not part of this variant's interface. Read
+> [LITO-RESEARCH.md](docs/LITO-RESEARCH.md) for scope, build and validation status.
+> XcodeGen must regenerate the project before building, as the CI workflow does.
+
 <div align="center">
 
 # 📡 Free FCC Unlock for iOS

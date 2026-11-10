@@ -30,6 +30,9 @@
 		AFF1192314592607D0703103 /* OsdGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E36E3BAA3849908DD68A3238 /* OsdGeneralTests.swift */; };
 		CEE9CA3AF49406C0DABF4EDB /* DumplBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17DB275E76F321F2FBFFDF0D /* DumplBuilder.swift */; };
 		F172F2F5ACAD38FEF33DF3C6 /* DiagnosticLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3883CFA580FEDD918B3C65F6 /* DiagnosticLog.swift */; };
+		872C82BBB2AB8F969773F15F /* LitoResearchPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48DC227FAC1631C1E94B6D0 /* LitoResearchPage.swift */; };
+		06CE5E716F66B7A89D03B2F2 /* LitoAltitudeResearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D56F9EB3890053FD4A2F225 /* LitoAltitudeResearch.swift */; };
+		2342C8E5B726A6ADD35593FC /* LitoAltitudeResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8575EE046ABAD2539DC48DF8 /* LitoAltitudeResearchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +72,9 @@
 		F269BDB2B666A11FD321ACE9 /* FreeFCCApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeFCCApp.swift; sourceTree = "<group>"; };
 		F73A57F3E7849D4A801DD6E7 /* DumplTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DumplTransport.swift; sourceTree = "<group>"; };
 		FC4824C1A32C6E8FF50C5043 /* profiles */ = {isa = PBXFileReference; lastKnownFileType = folder; name = profiles; path = FreeFCC/Resources/profiles; sourceTree = SOURCE_ROOT; };
+		C48DC227FAC1631C1E94B6D0 /* LitoResearchPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LitoResearchPage.swift; sourceTree = "<group>"; };
+		3D56F9EB3890053FD4A2F225 /* LitoAltitudeResearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LitoAltitudeResearch.swift; sourceTree = "<group>"; };
+		8575EE046ABAD2539DC48DF8 /* LitoAltitudeResearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LitoAltitudeResearchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -95,6 +101,7 @@
 		38C6B53F1F0095C6CF9A75B5 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				C48DC227FAC1631C1E94B6D0 /* LitoResearchPage.swift */,
 				EA329F636A29B171A430D2A7 /* AboutPage.swift */,
 				203737AE39B27A36A03A70D8 /* DesignSystem.swift */,
 				8C5016A106761EC7D61C1905 /* ExperimentalPage.swift */,
@@ -109,6 +116,7 @@
 		3BD8A6108344C62F029859D2 /* FreeFCCTests */ = {
 			isa = PBXGroup;
 			children = (
+				8575EE046ABAD2539DC48DF8 /* LitoAltitudeResearchTests.swift */,
 				1F945186B0344A4838B54BAB /* DumplBuilderTests.swift */,
 				C9560895781E977F93661B68 /* DumplStreamParserTests.swift */,
 				E36E3BAA3849908DD68A3238 /* OsdGeneralTests.swift */,
@@ -139,6 +147,7 @@
 		E6BBA74854223D57FB398E35 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				3D56F9EB3890053FD4A2F225 /* LitoAltitudeResearch.swift */,
 				3883CFA580FEDD918B3C65F6 /* DiagnosticLog.swift */,
 				17DB275E76F321F2FBFFDF0D /* DumplBuilder.swift */,
 				F73A57F3E7849D4A801DD6E7 /* DumplTransport.swift */,
@@ -201,11 +210,9 @@
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					0E5A2DE95D745BE7202BCCB4 = {
-						DevelopmentTeam = ERAK83QBBM;
 						ProvisioningStyle = Automatic;
 					};
 					8BDE549C455484451FE1D482 = {
-						DevelopmentTeam = ERAK83QBBM;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -247,6 +254,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2342C8E5B726A6ADD35593FC /* LitoAltitudeResearchTests.swift in Sources */,
 				320AD0030BD91BC2F23314B5 /* DumplBuilderTests.swift in Sources */,
 				176F59F1B50BEADD0020F1BE /* DumplStreamParserTests.swift in Sources */,
 				AFF1192314592607D0703103 /* OsdGeneralTests.swift in Sources */,
@@ -259,6 +267,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				06CE5E716F66B7A89D03B2F2 /* LitoAltitudeResearch.swift in Sources */,
+				872C82BBB2AB8F969773F15F /* LitoResearchPage.swift in Sources */,
 				6AC063AFA8088D9EB7B399CF /* AboutPage.swift in Sources */,
 				88D6A666212ADC3F487B2A80 /* DesignSystem.swift in Sources */,
 				F172F2F5ACAD38FEF33DF3C6 /* DiagnosticLog.swift in Sources */,
@@ -299,7 +309,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andreapiani.freefcc.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jdesalas.litoresearch.tests;
 				PRODUCT_NAME = FreeFCCTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -319,7 +329,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andreapiani.freefcc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jdesalas.litoresearch;
 				PRODUCT_NAME = FreeFCC;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
@@ -338,7 +348,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andreapiani.freefcc.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jdesalas.litoresearch.tests;
 				PRODUCT_NAME = FreeFCCTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -381,9 +391,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = ERAK83QBBM;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -396,7 +406,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.8.2;
+				MARKETING_VERSION = 1.8.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -444,9 +454,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = ERAK83QBBM;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -465,7 +475,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.8.2;
+				MARKETING_VERSION = 1.8.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -491,7 +501,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.andreapiani.freefcc;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jdesalas.litoresearch;
 				PRODUCT_NAME = FreeFCC;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;

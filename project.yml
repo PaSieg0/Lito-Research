@@ -12,9 +12,9 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
-    DEVELOPMENT_TEAM: ERAK83QBBM
-    MARKETING_VERSION: "1.8.2"
-    CURRENT_PROJECT_VERSION: "13"
+    DEVELOPMENT_TEAM: ""
+    MARKETING_VERSION: "1.8.3"
+    CURRENT_PROJECT_VERSION: "14"
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -34,7 +34,7 @@ targets:
         buildPhase: resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.andreapiani.freefcc
+        PRODUCT_BUNDLE_IDENTIFIER: com.jdesalas.litoresearch
         PRODUCT_NAME: FreeFCC
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: FreeFCC/Info.plist
@@ -51,7 +51,7 @@ targets:
       - path: FreeFCCTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.andreapiani.freefcc.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.jdesalas.litoresearch.tests
         PRODUCT_NAME: FreeFCCTests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/FreeFCC.app/FreeFCC"
